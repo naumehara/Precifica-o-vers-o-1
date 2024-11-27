@@ -1,0 +1,10 @@
+# Ignorar a pasta do ambiente virtual
+str/
+
+# Ignorar arquivos do sistema e arquivos temporários
+*.pyc
+__pycache__/
+.DS_Store
+
+# Ignorar a pasta .vscode (caso tenha)
+.vscode/
