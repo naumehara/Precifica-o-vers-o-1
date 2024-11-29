@@ -7,30 +7,45 @@ import matplotlib.pyplot as plt
 st.title('Precificação Versão 1')
 st.subheader('Estimativa de produtividade e conclusão de taxa comercial.')
 
-st.text('Para começar, indique a produtividade em sacas nos últimos anos')
-col1, col2, col3, col4 , col5= st.columns(5) #criar coluna
-# Cabeçalhos da "tabela"
-col1.write("Ano 1")
-col2.write("Ano 2")
-col3.write("Ano 3")
-col4.write("Ano 4")
-col5.write("Ano 5")
-
-# Inputs de produtividade para cada ano
-p1 = col1.number_input('Produtividade Ano 1', value=0, min_value=0, label_visibility="collapsed")
-p2 = col2.number_input('Produtividade Ano 2', value=0, min_value=0, label_visibility="collapsed")
-p3 = col3.number_input('Produtividade Ano 3', value=0, min_value=0,  label_visibility="collapsed")
-p4 = col4.number_input('Produtividade Ano 4', value=0, min_value=0,  label_visibility="collapsed")
-p5 = col5.number_input('Produtividade Ano 5', value=0, min_value=0,  label_visibility="collapsed")
-cob = st.selectbox('Escolha o nível de cobertura', options=('60%', '65%', '70%', '75%','80%' ))
-
-x = st.checkbox('Desconsiderar Desvio Padrão', value=False)
-# Ajustar o valor de x
-x_vl = 0 if x else 1
+y = st.checkbox('Indicar por Produtividade de Referência', value=False)
  
-md = np.mean([p1,p2,p3,p4,p5])
-dv = np.std([p1,p2,p3,p4,p5])*x_vl
-produtividade_segurada =  float(0 if round((md - dv) * (int(cob.strip('%')) / 100),2) <0 else round((md - dv) * (int(cob.strip('%')) / 100),2))
+if y:
+    # Entrada direta da produtividade de referência
+    md= st.number_input('Insira a produtividade de referência Média (em sacas)',value=0.00, 
+        min_value=0.00, 
+        format="%.2f"
+    )
+    dv= st.number_input('Desvio Padrão Estimado (Quantas sacas variam em torno da média)', value=0.00, format="%.2f")
+else:
+    st.text('Para começar, indique a produtividade em sacas nos últimos anos')
+    col1, col2, col3, col4 , col5= st.columns(5) #criar coluna
+    # Cabeçalhos da "tabela"
+    col1.write("Ano 1")
+    col2.write("Ano 2")
+    col3.write("Ano 3")
+    col4.write("Ano 4")
+    col5.write("Ano 5")
+
+    # Inputs de produtividade para cada ano
+    p1 = col1.number_input('Produtividade Ano 1', value=0.00, min_value=0.00, format="%.2f", label_visibility="collapsed")
+    p2 = col2.number_input('Produtividade Ano 2', value=0.00, min_value=0.00, format="%.2f", label_visibility="collapsed")
+    p3 = col3.number_input('Produtividade Ano 3', value=0.00, min_value=0.00, format="%.2f",  label_visibility="collapsed")
+    p4 = col4.number_input('Produtividade Ano 4', value=0.00, min_value=0.00, format="%.2f",  label_visibility="collapsed")
+    p5 = col5.number_input('Produtividade Ano 5', value=0.00, min_value=0.00, format="%.2f",  label_visibility="collapsed")
+
+    x = st.checkbox('Desconsiderar Desvio Padrão', value=False)
+    # Ajustar o valor de x
+    x_vl = 0 if x else 1
+    
+    md = np.mean([p1,p2,p3,p4,p5])
+    dv = np.std([p1,p2,p3,p4,p5])*x_vl
+
+produtividade_referencia = round(md-dv,2)
+st.text('Produtividade de referência:')
+st.markdown(f"**{produtividade_referencia}**"+' sacas')
+
+cob = st.selectbox('Escolha o nível de cobertura', options=('60%', '65%', '70%', '75%','80%' ))
+produtividade_segurada =  float(0 if round(produtividade_referencia * (int(cob.strip('%')) / 100),2) <0 else round(produtividade_referencia * (int(cob.strip('%')) / 100),2))
 st.text('A produtividade segurada será de:')
 st.markdown(f"**{produtividade_segurada}**"+' sacas')
 
@@ -88,7 +103,9 @@ st.write("""
 
 tx_comercial = round(area*(1+carr_seg)/(1-da),4)
 st.text('Portanto, a taxa comercial será de:')
-st.markdown(f"**{tx_comercial}**")
+st.markdown(f""" {tx_comercial} ,  ou seja: """, unsafe_allow_html=True)
+st.markdown(f"<span style='font-size: 48px; font-weight: bold; color: #4CAF50;'>{tx_comercial*100:.2f}%</span>", unsafe_allow_html=True)
+
 
 #st.write("Produtividades Inseridas")
 #st.table({
